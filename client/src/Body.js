@@ -78,16 +78,17 @@ const Body = ({CandidateList, votecandidate, account}) => {
         <div className="my-5 mr-auto ml-auto text-left" style={{width: "70%"}}>
             <h5>Cast Your Vote:</h5>
             <form onSubmit={onsubmit}>
-                <select name="candidate" className="form-control" onChange={onchange}>
-                    <option defaultValue value="">
-                        Select
-                    </option>
-                    {
-                        FinalCandidateList.map((candidates) => (
-                            <option value={candidates.id}>{candidates.name}</option>
-                        ))   
-                    }
-                </select>
+            <select name="candidate" className="form-control" onChange={onchange}>
+  <option defaultValue value="">
+    Select
+  </option>
+  {FinalCandidateList.map((candidate) => (
+    <option key={candidate.id} value={candidate.id}>
+      {candidate.name}
+    </option>
+  ))}
+</select>
+
                 <button className="btn btn-primary mt-2 btn-md w-100">
                     Vote Candidate{" "} {Candidate}
                 </button>

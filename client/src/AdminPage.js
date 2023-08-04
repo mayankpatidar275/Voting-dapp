@@ -1,85 +1,90 @@
-import React, { useState, useEffect } from 'react'
-import Web3 from 'web3';
-import Electionabi from './contracts/Election.json';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { ethers } from 'ethers'; // Import ethers library
+
+import ABI from './contracts/Election.sol/Election.json';
 
 const AdminPage = () => {
+  const [name, setName] = useState('');
+  const [loader, setLoader] = useState(false);
+  const [provider, setProvider] = useState(null);
+  const [network, setNetwork] = useState('');
+  const [contract, setContract] = useState(null);
 
-const [name, setName] = useState("");
+  useEffect(() => {
+    const initializeProvider = async () => {
+      if (window.ethereum) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        setProvider(provider);
+      }
+    };
 
-useEffect(() => {
-  loadWeb3();
-  LoadBlockchaindata();
-}, [])
+    initializeProvider();
 
-const[Currentaccount, setCurrentaccount] = useState("");
-const[loader, setloader] = useState(true);
-const[Electionsm, SetElectionsm] = useState();
+    const getNetwork = async () => {
+      if (provider) {
+        const network = await provider.getNetwork();
+        setNetwork(network.name);
+      }
+    };
 
-const loadWeb3 = async () => {
-  if(window.ethereum) {
-    window.web3 = new Web3(window.ethereum);
-    await window.ethereum.enable();
-  } else if (window.web3){
-    window.web3 = new Web3(window.web3.currentProvider);
-  } else {
-    window.alert(
-      "Non-Ethereum browser detected. You should consider trying Metamask !"
-    );
+    getNetwork();
+
+    const deployContract = async () => {
+      if (provider) {
+        const signer = provider.getSigner();
+        const contractAddress = '0x458C1Ad6b1EfEc0bb5661A4ef80356C2DA63d001';
+        const deployedContract = new ethers.Contract(contractAddress, ABI.abi, signer);
+        setContract(deployedContract);
+      }
+    };
+    deployContract();
+    // console.log(ABI);
+  }, [provider]);
+
+  const addCandidate = async () => {
+    setLoader(true);
+    try {
+      if (contract) {
+        const tx = await contract.addCandidate(name);
+        await tx.wait(); // Wait for the transaction to be mined
+        console.log("Candidate added successfully");
+      }
+    } catch (error) {
+      console.error("Error adding candidate:", error);
+    }
+    setLoader(false);
+  };
+
+  if (loader) {
+    return <div>Loading...</div>;
   }
-};
-
-const LoadBlockchaindata = async () =>{
-  setloader(true);
-  const web3 = window.web3;
-  const accounts = await web3.eth.getAccounts();
-  const account = accounts[0];
-  setCurrentaccount(account);
-  const networkId = await web3.eth.net.getId();
-  const networkData = Electionabi.networks[networkId];
-
-  if(networkData){
-    const election = new web3.eth.Contract(Electionabi.abi, networkData.address);
-    SetElectionsm(election);
-    setloader(false);
-  } else{
-    window.alert("the smart contract is not deployed current network")
-  }
-}
-
-const addcandidate = async () => {
-  setloader(true);
-  await Electionsm.methods.addCandidate(name).send({from : Currentaccount}).on('transactionhash' ,()=>{
-    console.log("successfully added");
-  })
-  setloader(false);
-}
-
-if(loader){
-  return <div>Loading...</div>
-}
 
   return (
     <div>
       <nav className="navbar navbar-dark bg-dark shadow nb-5">
-          <Link to="/">
-              <h1 className="navbar-brand mx-auto">E - Voting System</h1>
-          </Link>
+        <Link to="/">
+          <h1 className="navbar-brand mx-auto">E - Voting System</h1>
+        </Link>
       </nav>
-      <div style={{height: '60vh'}} className="d-flex justify-content-center align-items-center">
-      <div>
+      <div style={{ height: '60vh' }} className="d-flex justify-content-center align-items-center">
+        <div>
           <h3>Enter the candidate name</h3>
-          <form onSubmit={addcandidate}>
-              <div className="col mt-5">
-                  <input type="text" className="form-control" placeholder="Candidate name" value={name} onChange={(e) => setName(e.target.value)}/>
-              </div>
-              <div className="d-flex justify-content-center align-items-center">
-                  <button type="submit" className="btn btn-primary m-3">Add</button>
-              </div>
+          <form onSubmit={addCandidate}>
+            <div className="col mt-5">
+              <input type="text" className="form-control" placeholder="Candidate name" value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+            <div className="d-flex justify-content-center align-items-center">
+              <button type="submit" className="btn btn-primary m-3">
+                Add
+              </button>
+            </div>
           </form>
-      </div>
+        </div>
       </div>
     </div>
-  )
-}
-export default AdminPage
+  );
+};
+
+export default AdminPage;
