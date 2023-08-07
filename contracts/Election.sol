@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 contract Election {
     address public admin;                   
     uint public startTime;
-    uint public votingDuration = 3 days;    
+    uint public votingDuration = 365 days;    
     // Model a Candidate
     struct Candidate {
         uint id;

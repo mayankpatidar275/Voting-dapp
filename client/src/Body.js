@@ -53,7 +53,7 @@ const Body = ({CandidateList, votecandidate, account}) => {
             />
                 {
                     [...FinalCandidateList].sort((a, b) => b.voteCount - a.voteCount).map((candidates) =>{
-                        return (<div key={candidates.voteCount}>
+                        return (<div key={candidates.id}>
                             <div
                                 className="row ml-auto mr-auto mt-2 mb-2"
                                 style={{width: "90%"}}
@@ -79,15 +79,17 @@ const Body = ({CandidateList, votecandidate, account}) => {
             <h5>Cast Your Vote:</h5>
             <form onSubmit={onsubmit}>
             <select name="candidate" className="form-control" onChange={onchange}>
-  <option defaultValue value="">
-    Select
-  </option>
-  {FinalCandidateList.map((candidate) => (
-    <option key={candidate.id} value={candidate.id}>
-      {candidate.name}
-    </option>
-  ))}
-</select>
+                <option defaultValue value="">
+                    Select
+                </option>
+                {FinalCandidateList.map((candidate) => (
+                    <option key={candidate.id} value={candidate.id}>
+                    {candidate.name}
+                    </option>
+                ))}
+            </select>
+
+
 
                 <button className="btn btn-primary mt-2 btn-md w-100">
                     Vote Candidate{" "} {Candidate}

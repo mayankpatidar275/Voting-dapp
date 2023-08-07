@@ -7,7 +7,7 @@ import Body from './Body';
 function VotingPage() {
   const [loader, setLoader] = useState(false);
   const [currentAccount, setCurrentAccount] = useState('');
-  const [provider, setProvider] = useState(null);
+  const [provider, setProvider] = useState(null); 
   const [contract, setContract] = useState(null);
   const [candidateList, setCandidateList] = useState([]);
   const [startTime, setStartTime] = useState(0);
@@ -15,9 +15,12 @@ function VotingPage() {
 
   const loadWeb3 = async () => {
     if (window.ethereum) {
+      // setLoader(true);
+      console.log("loadWeb3");
       await window.ethereum.request({ method: 'eth_requestAccounts' });
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       setProvider(provider);
+      console.log("loadWeb3 after");
     } else {
       window.alert("Non-Ethereum browser detected. You should consider trying Metamask !");
     }
@@ -25,25 +28,32 @@ function VotingPage() {
 
   const loadBlockchainData = async () => {
     try {
-      if (!provider) {
-        return;
-      }
-      const signer = provider.getSigner();
-      const contractAddress = '0x458C1Ad6b1EfEc0bb5661A4ef80356C2DA63d001';
+      console.log("trying provider");
+      if (provider) {
+        setLoader(true);
+        const signer = provider.getSigner();
+      const contractAddress = '0x4e72fbE777b4Af6F5B773F9f14f7a25b4AF60a9D';
       const deployedContract = new ethers.Contract(contractAddress, ABI.abi, signer);
-      setContract(deployedContract);
-  
+      
       const accounts = await provider.listAccounts();
       const account = accounts[0];
+      setContract(deployedContract);
+      console.log("setting current account");
       setCurrentAccount(account);  
+      console.log("done setting current account");
+      // setLoader(false);
+      }
+
     } catch (error) {
       console.error("Error loading contract data:", error);
     }
   }; 
   
-  const loadCandidateData = async (contract) => {
+  const loadCandidateData = async () => {
     try {
-      console.log("here");
+      if(provider && contract){
+        // setLoader(true);
+        console.log("loadCandidate");
       const candidateCount = (await contract.candidatesCount()).toNumber();
   
       const fetchedCandidates = [];
@@ -65,40 +75,58 @@ function VotingPage() {
       console.log(candidateList);
       setStartTime(startTime.toNumber());
       setVotingDuration(votingDuration.toNumber());
-      // setLoader(false);
+      console.log("loadCandidate after");
+      setLoader(false);
+      }
     } catch (error) {
       console.error("Error loading candidate data:", error);
     }
   };
   
-  
-
   useEffect(() => {
     loadWeb3();
-    loadBlockchainData();
   }, []);
-  useEffect(() => {
-    console.log(candidateList);
-  }, [candidateList]);
-  useEffect(() => {
-    if (contract) {  
-      loadCandidateData(contract);
-    }
-  }, [contract]);
 
+  useEffect(() => {
+    const loadData = async () => {
+      if (provider) {
+        console.log("Loading blockchain data...");
+        await loadBlockchainData();
+      }
+    };
+    loadData(); // Call the function that handles async operations
+  }, [provider]);
 
+  useEffect(() => {
+    const loadData = async () => {
+      if (contract) {
+        console.log("Loading candidate data...");
+        await loadCandidateData();
+      }
+    };
+    loadData(); // Call the function that handles async operations
+  }, [contract, provider]);
+  
   const votecandidate = async (candidateid) => {
     try {
       setLoader(true);
+  
+      if (!contract) {
+        console.error("Contract not initialized.");
+        return;
+      }
+  
       const tx = await contract.vote(candidateid);
+      
       await tx.wait();
-      console.log("successfully ran");
+      console.log("Vote successful");
     } catch (error) {
       console.error("Error voting:", error);
     } finally {
       setLoader(false);
     }
   };
+  
 
   const calculateTimeLeft = () => {
     const difference = startTime * 1000 + votingDuration * 1000 - +new Date();

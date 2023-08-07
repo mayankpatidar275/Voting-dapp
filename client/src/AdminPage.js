@@ -34,7 +34,7 @@ const AdminPage = () => {
     const deployContract = async () => {
       if (provider) {
         const signer = provider.getSigner();
-        const contractAddress = '0x458C1Ad6b1EfEc0bb5661A4ef80356C2DA63d001';
+        const contractAddress = '0x4e72fbE777b4Af6F5B773F9f14f7a25b4AF60a9D';
         const deployedContract = new ethers.Contract(contractAddress, ABI.abi, signer);
         setContract(deployedContract);
       }
