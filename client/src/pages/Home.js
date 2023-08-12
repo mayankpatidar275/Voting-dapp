@@ -1,14 +1,18 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { useBlockchainContext } from '../context/BlockchainContext';
+
+import Navbar from '../components/Navbar';
 
 const Home = () => {
+    const { currentAccount } = useBlockchainContext();
+
   return (
     <div>
-      <nav className="navbar navbar-dark bg-dark shadow nb-5">
-          <Link to="/">
-              <h1 className="navbar-brand mx-auto">E - Voting System</h1>
-          </Link>
-      </nav>
+      <Navbar account={null} startTime={null} />
+      <p className="my-5 mt-4 text-center">
+        Your address: <span className="font-weight-bold">{currentAccount}</span>
+      </p>
       <div style={{height: '40vh'}} className="d-flex justify-content-center align-items-center">
           <Link to="/admin">
             <button type="button" className="btn-lg m-4 btn btn-primary">Admin</button>

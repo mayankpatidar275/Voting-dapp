@@ -1,4 +1,5 @@
-import React from 'react'
+// import React from 'react'
+import React, { memo } from 'react';
 import { Link } from 'react-router-dom'
 
 const Navbar = ({account , startTime}) => {
@@ -9,12 +10,14 @@ const Navbar = ({account , startTime}) => {
         <Link to="/">
             <h1 className="navbar-brand mx-auto">E - Voting System</h1>
         </Link>
+        {startTime !== null && (
         <ul className="navbar-nav">
           <li className="nav-item text-white font-weight-bold">Voting started on:</li>
           <li className="nav-item text-white">{startDateTime}</li>
         </ul>
+      )}
     </nav>
   )
 }
 
-export default Navbar
+export default memo(Navbar);
